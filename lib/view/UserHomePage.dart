@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../model/UserService.dart';
+import 'LoginView.dart';
+
 class UserHomePage extends StatefulWidget {
   @override
   _UserHomePageState createState() => _UserHomePageState();
+
 }
 
 class _UserHomePageState extends State<UserHomePage> {
+  final UserService _userService = UserService();
   List<Map<String, String>> items = List.generate(
     10,
         (index) => {'title': 'Item ${index + 1}', 'subtitle': 'Details about item ${index + 1}', 'date': '2024-08-${index + 1}'},
@@ -42,9 +47,22 @@ class _UserHomePageState extends State<UserHomePage> {
     }
   }
 
-  void _logout() {
-    // Clear login state and navigate to login page
-    Navigator.pushReplacementNamed(context, '/login');
+  Future<void> _logout(BuildContext context) async {
+    try {
+      await _userService.logout(); // Clear the login status
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => LoginView(), // Navigate back to the login page
+        ),
+      );
+    } catch (e) {
+      print('Error logging out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error logging out. Please try again.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -55,7 +73,7 @@ class _UserHomePageState extends State<UserHomePage> {
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: _logout,
+            onPressed: () => _logout(context),
           ),
         ],
       ),
