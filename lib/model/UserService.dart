@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-
+import 'package:shared_preferences/shared_preferences.dart';
 class UserService {
+  static const String _keyIsLoggedIn = 'isLoggedIn';
   Future<List<Map<String, dynamic>>> loadUsers() async {
     try {
       final jsonString = await rootBundle.loadString('assets/users.json');
@@ -43,6 +44,41 @@ class UserService {
     } catch (e) {
       print('Error validating user: $e');
       return false;
+    }
+  }
+  // Lưu trạng thái đăng nhập
+  Future<void> saveLoginStatus(bool isLoggedIn) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyIsLoggedIn, isLoggedIn);
+      print('Login status saved: $isLoggedIn');
+    } catch (e) {
+      print('Error saving login status: $e');
+    }
+  }
+
+  // Lấy trạng thái đăng nhập
+  Future<bool> getLoginStatus() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool status = prefs.getBool(_keyIsLoggedIn) ?? false;
+      print('Retrieved login status: $status');
+      return status;
+    } catch (e) {
+      print('Error retrieving login status: $e');
+      return false; // Return false in case of an error
+    }
+  }
+
+
+  // Đăng xuất và xóa trạng thái đăng nhập
+  Future<void> logout() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyIsLoggedIn);
+      print('Logout successful: login status cleared');
+    } catch (e) {
+      print('Error logging out: $e');
     }
   }
 }
